@@ -1,0 +1,34 @@
+#version 400
+in vec2 pos;
+out vec4 fragColor;
+
+uniform sampler2D colormap;
+
+void main()
+{
+  float fx = abs(sin(pos.x/20));
+  float fy = abs(sin(pos.y/20));
+  if (fx>0.9975)
+    fx = (fx-0.9975)/0.0025;
+  else
+    fx = 0;
+  if (fy>0.9975)
+    fy = (fy-0.9975)/0.0025;
+  else
+    fy = 0;
+  float ffx = abs(sin(pos.x/4));
+  float ffy = abs(sin(pos.y/4));
+  if (ffx>0.999)
+    ffx = (ffx-0.999)/0.001;
+  else
+    ffx = 0;
+  if (ffy>0.999)
+    ffy = (ffy-0.999)/0.001;
+  else
+    ffy = 0;
+
+  fragColor = vec4(vec3(
+        clamp(fx+fy, 0, 1)*(-.2) + 
+        clamp(ffx+ffy, 0, 1)*(-.1) + 
+        0.5),1 );
+}

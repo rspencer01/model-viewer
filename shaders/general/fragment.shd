@@ -1,0 +1,38 @@
+#version 410
+layout(location=0) out vec4 fragmentColor;
+layout(location=1) out vec4 fragmentNorm;
+layout(location=2) out vec4 fragmentPos;
+
+in VertexData
+{
+  vec4 position;
+  vec4 normal;
+  vec4 color;
+  vec2 uv;
+  vec3 tangent;
+  vec3 bitangent;
+  vec4 boneids;
+} VertexOut;
+
+uniform sampler2D colormap;
+uniform sampler2D normalmap;
+uniform int options;
+uniform vec3 sunDirection = normalize(vec3(0,1,1));
+
+void main()
+{
+  vec3 normalDetail = normalize(textureLod(normalmap, VertexOut.uv, 0).xyz-0.5);
+  vec3 normal       = normalize(VertexOut.normal.xyz);
+  vec3 tangent      = normalize(VertexOut.tangent.xyz);
+  vec3 bitangent    = normalize(VertexOut.bitangent.xyz);
+  mat3 mt           = mat3(tangent, bitangent, normal);
+
+  vec3 actualNormal;
+
+  if ((options) % 2 == 1)
+    actualNormal = mt * normalDetail;
+  else
+    actualNormal = normal;
+
+  fragmentColor  = vec4(texture(colormap, VertexOut.uv).rgb * max(0.5, dot(actualNormal, sunDirection)),1);
+}
