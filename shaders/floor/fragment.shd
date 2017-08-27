@@ -6,8 +6,8 @@ uniform sampler2D colormap;
 
 void main()
 {
-  float fx = abs(sin(pos.x/20));
-  float fy = abs(sin(pos.y/20));
+  float fx = abs(sin(pos.x/10));
+  float fy = abs(sin(pos.y/10));
   if (fx>0.9975)
     fx = (fx-0.9975)/0.0025;
   else
@@ -16,8 +16,8 @@ void main()
     fy = (fy-0.9975)/0.0025;
   else
     fy = 0;
-  float ffx = abs(sin(pos.x/4));
-  float ffy = abs(sin(pos.y/4));
+  float ffx = abs(sin(pos.x));
+  float ffy = abs(sin(pos.y));
   if (ffx>0.999)
     ffx = (ffx-0.999)/0.001;
   else

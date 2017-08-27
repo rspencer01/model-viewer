@@ -13,7 +13,7 @@ from collections import namedtuple
 import Animation
 
 MeshOptions = namedtuple("MeshOptions", ('has_bumpmap', 'has_bones'))
-MeshDatum = namedtuple("MeshDatum", ('name', 'data', 'indices', 'colormap', 'normalmap', 'options'))
+MeshDatum = namedtuple("MeshDatum", ('name', 'data', 'indices', 'colormap', 'normalmap', 'specularmap', 'options'))
 time = 0
 
 def getOptionNumber(meshOptions):
@@ -46,10 +46,14 @@ def getTextureFile(material, textureType, directory=None):
   elif textureType == pyassimp.material.aiTextureType_NORMALS:
     if os.path.exists(directory+'/{}.norm.png'.format(material.properties[('name', 0)])):
       return '{}.norm.png'.format(material.properties[('name', 0)])
+  elif textureType == pyassimp.material.aiTextureType_SPECULAR:
+    if os.path.exists(directory+'/{}.spec.png'.format(material.properties[('name', 0)])):
+      return '{}.spec.png'.format(material.properties[('name', 0)])
 
 shader             = Shaders.getShader('general')
 shader['colormap'] = Texture.COLORMAP_NUM
 shader['normalmap'] = Texture.NORMALMAP_NUM
+shader['specularmap'] = Texture.SPECULARMAP_NUM
 
 class Object(object):
   def __init__(
@@ -147,11 +151,10 @@ class Object(object):
     vertBitangents = mesh.bitangents
 
     tinvtrans = np.linalg.inv(trans).transpose()
-    if not self.will_animate:
-      # Transform all the vertex positions.
-      for i in xrange(len(vertPos)):
-        vertPos[i] = trans.dot(vertPos[i])
-        vertNorm[i] = tinvtrans.dot(vertNorm[i]) * self.scale
+    # Transform all the vertex positions.
+    for i in xrange(len(vertPos)):
+      vertPos[i] = trans.dot(vertPos[i])
+      vertNorm[i] = tinvtrans.dot(vertNorm[i])
     # Splice correctly, killing last components
     vertPos = vertPos[:,0:3]# - self.offset
     vertNorm = vertNorm[:,0:3]
@@ -187,6 +190,13 @@ class Object(object):
       normalTexture = None
       options = options._replace(has_bumpmap=False)
 
+    if getTextureFile(mesh.material, pyassimp.material.aiTextureType_SPECULAR, self.directory):
+      logging.info("Getting texture from {}".format(getTexturePath(getTextureFile(mesh.material, pyassimp.material.aiTextureType_SPECULAR, self.directory))))
+      specTexture = Texture.Texture(Texture.SPECULARMAP, nonblocking=self.daemon)
+      specTexture.loadFromImage(self.directory+'/'+getTexturePath(getTextureFile(mesh.material, pyassimp.material.aiTextureType_SPECULAR, self.directory)))
+    else:
+      specTexture = Texture.getBlackTexture()
+
     # Do skinning
     if self.will_animate:
       if len(mesh.bones) > 0:
@@ -211,7 +221,7 @@ class Object(object):
 
     # Add the textures and the mesh data
     self.textures.append(texture)
-    self.meshes.append(MeshDatum(name, data, indices, texture, normalTexture, options))
+    self.meshes.append(MeshDatum(name, data, indices, texture, normalTexture, specTexture, options))
 
     taskQueue.addToMainThreadQueue(self.uploadMesh, (data, indices, mesh))
 
@@ -246,6 +256,7 @@ class Object(object):
 
       # Load textures
       meshdatum.colormap.load()
+      meshdatum.specularmap.load()
       if meshdatum.options.has_bumpmap:
         meshdatum.normalmap.load()
       shader.draw(gl.GL_TRIANGLES, renderID)

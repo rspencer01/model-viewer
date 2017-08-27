@@ -15,9 +15,11 @@ in VertexData
 } VertexOut;
 
 uniform sampler2D colormap;
+uniform sampler2D specularmap;
 uniform sampler2D normalmap;
 uniform int options;
 uniform vec3 sunDirection = normalize(vec3(0,1,1));
+uniform vec3 CameraPosition;
 
 void main()
 {
@@ -34,5 +36,12 @@ void main()
   else
     actualNormal = normal;
 
-  fragmentColor  = vec4(texture(colormap, VertexOut.uv).rgb * max(0.5, dot(actualNormal, sunDirection)),1);
+  float specmapvalue = texture(specularmap, VertexOut.uv).r * 0.5;
+
+  float spec = pow(max(0,dot(
+        normalize(VertexOut.position.xyz - CameraPosition),
+        normalize(reflect(sunDirection, actualNormal))
+        )),
+        5);
+  fragmentColor  = vec4(specmapvalue*spec+texture(colormap, VertexOut.uv).rgb * max(0.4, dot(actualNormal, sunDirection)),1);
 }

@@ -34,7 +34,7 @@ class MainScene(Scene):
     # Simply move the sun around the sky
     dent.Shaders.setUniform('sunDirection', np.array(
       [np.sin(self.time),
-        1,
+        0.4,
         np.cos(self.time)]))
     self.time += 1./fps
 
