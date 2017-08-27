@@ -13,7 +13,10 @@ class MainScene(Scene):
     super(MainScene, self).__init__()
     self.renderPipeline.stages.append(
         RenderStage(render_func=self.display, final_stage=True))
-    self.object = Object(dent.args.args.model, daemon=False)
+    print dent.args.args.animation
+    self.object = Object(dent.args.args.model,
+        will_animate=dent.args.args.animation is not None,
+        daemon=False)
     if dent.args.args.animation:
       self.object.add_animation(dent.args.args.animation)
     self.camera.lockObject = self.object

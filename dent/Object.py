@@ -59,10 +59,14 @@ class Object(object):
       scale=1,
       position=np.zeros(3),
       offset=np.zeros(3),
+      will_animate=False,
       daemon=True):
 
     if name == None:
       name = os.path.basename(filename)
+
+    if will_animate:
+      daemon = False
 
     self.filename = filename
     self.directory = os.path.dirname(filename)
@@ -76,6 +80,7 @@ class Object(object):
     self.bone_transforms = [np.eye(4, dtype=float) for _ in xrange(60)]
     self.animations = []
     self.animation = None
+    self.will_animate = will_animate
     self.position = np.array(position, dtype=np.float32)
     self.offset = np.array(offset, dtype=np.float32)
     self.direction = np.array((0,0,1), dtype=float)
@@ -142,10 +147,11 @@ class Object(object):
     vertBitangents = mesh.bitangents
 
     tinvtrans = np.linalg.inv(trans).transpose()
-    # Transform all the vertex positions.
-#    for i in xrange(len(vertPos)):
-#      vertPos[i] = trans.dot(vertPos[i])
-#      vertNorm[i] = tinvtrans.dot(vertNorm[i]) * self.scale
+    if not self.will_animate:
+      # Transform all the vertex positions.
+      for i in xrange(len(vertPos)):
+        vertPos[i] = trans.dot(vertPos[i])
+        vertNorm[i] = tinvtrans.dot(vertNorm[i]) * self.scale
     # Splice correctly, killing last components
     vertPos = vertPos[:,0:3]# - self.offset
     vertNorm = vertNorm[:,0:3]
@@ -182,25 +188,26 @@ class Object(object):
       options = options._replace(has_bumpmap=False)
 
     # Do skinning
-    if len(mesh.bones) > 0:
-      options = options._replace(has_bones=True)
-      data["weights"] = 0
-      for bone in mesh.bones:
-        n = len(self.bones)
-        if bone.name not in self.bones:
-          self.bones[bone.name] = (n, get_node_parent(self.scene, bone.name).name, bone.offsetmatrix)
-          nn =n
-        else:
-          nn = self.bones[bone.name][0]
-        for relationship in bone.weights:
-          bone_vec_number = 0
-          for i in xrange(3):
-            if data["weights"][relationship.vertexid][bone_vec_number] > 0:
-              bone_vec_number += 1
-            else:
-              break
-          data["weights"][relationship.vertexid][bone_vec_number] = relationship.weight
-          data["bone_ids"][relationship.vertexid][bone_vec_number] = nn
+    if self.will_animate:
+      if len(mesh.bones) > 0:
+        options = options._replace(has_bones=True)
+        data["weights"] = 0
+        for bone in mesh.bones:
+          n = len(self.bones)
+          if bone.name not in self.bones:
+            self.bones[bone.name] = (n, get_node_parent(self.scene, bone.name).name, bone.offsetmatrix)
+            nn =n
+          else:
+            nn = self.bones[bone.name][0]
+          for relationship in bone.weights:
+            bone_vec_number = 0
+            for i in xrange(3):
+              if data["weights"][relationship.vertexid][bone_vec_number] > 0:
+                bone_vec_number += 1
+              else:
+                break
+            data["weights"][relationship.vertexid][bone_vec_number] = relationship.weight
+            data["bone_ids"][relationship.vertexid][bone_vec_number] = nn
 
     # Add the textures and the mesh data
     self.textures.append(texture)
@@ -246,7 +253,6 @@ class Object(object):
 
   def add_animation(self, filename):
     self.animation = Animation.Animation(filename, self.bones)
-
 
   def __repr__(self):
     return "<pmObject \"{}\">".format(self.name)
