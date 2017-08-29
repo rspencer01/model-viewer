@@ -41,6 +41,7 @@ class MainScene(Scene):
   def display(self, width, height, **kwargs):
     projection = dent.transforms.perspective(60.0, width/float(height), 0.3, 1e7)
     dent.Shaders.setUniform('projection', projection)
+    self.floor.shader['objectPos'] = self.object.position
 
     self.camera.render()
 
