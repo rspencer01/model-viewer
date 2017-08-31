@@ -3,7 +3,10 @@ import os
 from Configuration import Configuration
 
 def load(filename, schema_filename):
-  schema = yaml.load(open(schema_filename).read())
+  try:
+    schema = yaml.load(open(schema_filename).read())
+  except IOError as e:
+    schema = {}
   cfg = Configuration(schema)
   if os.path.exists(filename):
     cfg.read(filename)

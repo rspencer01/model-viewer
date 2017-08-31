@@ -4,8 +4,6 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--remake-config-file', action='store_true')
 parser.add_argument('--reload-textures', action='store_true')
-parser.add_argument('model')
-parser.add_argument('--animation', required=False, default=None)
 parser.add_argument('-v', '--verbose', action='store_true')
 
 parser.add_argument('--replay', default=None)

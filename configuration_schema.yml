@@ -1,6 +1,0 @@
----
-none:
-  help: |
-    Placeholder
-  type: integer
-  default: 100

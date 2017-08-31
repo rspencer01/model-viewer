@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import os
 import sys
 if getattr(sys, 'frozen', False):
@@ -8,15 +7,15 @@ import time
 import logging
 import numpy as np
 import numpy.linalg
-import dent.taskQueue as taskQueue
+import taskQueue
 import OpenGL.GL as gl
 import OpenGL.GLU as glu
 import OpenGL.GLUT as glut
 import Image
-import dent.messaging as messaging
+import messaging
 import random
 
-import dent.args as args
+import args
 args.parse()
 
 LOGGING_FORMAT = '%(asctime)-15s <%(threadName)-12s> [%(module)-12s] - %(message)s'
@@ -25,7 +24,7 @@ if args.args.verbose:
 else:
   logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO)
 
-import dent.configuration as configuration
+import configuration
 
 Re = 6.360e6
 
@@ -155,7 +154,7 @@ def keyboard_up_handler(key):
 
 def mouse_handler(button, state, x, y):
   if button in (3,4):
-    scene.camera.lockDistance += (button - 3.5)*10
+    scene.camera.lockDistance += button - 3.5
   if not hold_mouse:
     glut.glutWarpPointer(windowWidth/2,windowHeight/2)
 
