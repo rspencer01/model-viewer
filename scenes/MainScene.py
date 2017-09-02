@@ -46,5 +46,5 @@ class MainScene(Scene):
     self.camera.render()
 
     self.sky.display()
-    self.object.display()
+    self.object.display(time=self.time)
     self.floor.display()
