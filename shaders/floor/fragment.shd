@@ -28,7 +28,7 @@ void main()
   else
     ffy = 0;
 
-  float shadow =  1 - 0.8*exp(-pow(length(pos-objectPos.xz),2)/150);
+  float shadow =  1 - 0.8*exp(-pow(length(pos*2-objectPos.xz),2)/350);
 
   fragColor = vec4(vec3(
         clamp(fx+fy, 0, 1)*(-.2) + 

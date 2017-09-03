@@ -13,12 +13,11 @@ class MainScene(Scene):
     super(MainScene, self).__init__()
     self.renderPipeline.stages.append(
         RenderStage(render_func=self.display, final_stage=True))
-    print dent.args.args.animation
     self.object = Object(dent.args.args.model,
         will_animate=dent.args.args.animation is not None,
         daemon=False)
     if dent.args.args.animation:
-      self.object.add_animation(dent.args.args.animation)
+      self.object.add_animation(dent.args.args.animation, True)
     self.camera.lockObject = self.object
     self.camera.lockDistance = 200
     self.camera.move_hook = lambda x: \
@@ -43,8 +42,10 @@ class MainScene(Scene):
     dent.Shaders.setUniform('projection', projection)
     self.floor.shader['objectPos'] = self.object.position
 
+    self.object.update(self.time)
+
     self.camera.render()
 
     self.sky.display()
-    self.object.display(time=self.time)
+    self.object.display()
     self.floor.display()
