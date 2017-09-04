@@ -3,5 +3,6 @@
 import dent.args
 dent.args.parser.add_argument('model')
 dent.args.parser.add_argument('--animation', required=False, default=None)
+dent.args.parser.add_argument('--actions', required=False, default=None)
 
 import dent.core

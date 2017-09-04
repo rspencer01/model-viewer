@@ -2,6 +2,7 @@ from dent.Scene import Scene
 from dent.Object import Object
 from dent.RenderStage import RenderStage
 from dent.RectangleObjects import RectangleObject, BlankImageObject
+from dent.ActionController import ActionController
 import dent.Shaders
 import numpy as np
 import dent.transforms
@@ -14,10 +15,14 @@ class MainScene(Scene):
     self.renderPipeline.stages.append(
         RenderStage(render_func=self.display, final_stage=True))
     self.object = Object(dent.args.args.model,
-        will_animate=dent.args.args.animation is not None,
+        will_animate=
+          dent.args.args.animation is not None or
+          dent.args.args.actions is not None,
         daemon=False)
     if dent.args.args.animation:
-      self.object.add_animation(dent.args.args.animation, True)
+      self.object.add_animation(dent.args.args.animation)
+    if dent.args.args.actions:
+      self.object.action_controller = ActionController(self.object, dent.args.args.actions)
     self.camera.lockObject = self.object
     self.camera.lockDistance = 200
     self.camera.move_hook = lambda x: \
