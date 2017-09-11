@@ -32,6 +32,11 @@ class MainScene(Scene):
     self.sky = BlankImageObject(0.4, 0.5, 0.6)
 
     dent.messaging.add_handler('timer', self.timer)
+
+    if self.object.action_controller is not None:
+      self.object.action_controller.action_weight = lambda x:\
+        np.linalg.norm(x.get_end_position())
+
     self.time = 0.
 
   def timer(self, fps):
