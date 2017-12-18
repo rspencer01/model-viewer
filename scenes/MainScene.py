@@ -24,9 +24,9 @@ class MainScene(Scene):
     if dent.args.args.actions:
       self.object.action_controller = ActionController(self.object, dent.args.args.actions)
     self.camera.lockObject = self.object
-    self.camera.lockDistance = 200
+    self.camera.lockDistance = 2
     self.camera.move_hook = lambda x: \
-      [x[0], max(5, x[1]), x[2]]
+      [x[0], max(0.05, x[1]), x[2]]
 
     self.floor = RectangleObject('floor')
     self.sky = BlankImageObject(0.4, 0.5, 0.6)
@@ -48,7 +48,7 @@ class MainScene(Scene):
     self.time += 1./fps
 
   def display(self, width, height, **kwargs):
-    projection = dent.transforms.perspective(60.0, width/float(height), 0.3, 1e7)
+    projection = dent.transforms.perspective(60.0, width/float(height), 0.03, 1e4)
     dent.Shaders.setUniform('projection', projection)
     self.floor.shader['objectPos'] = self.object.position
 
