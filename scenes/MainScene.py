@@ -32,12 +32,20 @@ class MainScene(Scene):
     self.sky = BlankImageObject(0.4, 0.5, 0.6)
 
     dent.messaging.add_handler('timer', self.timer)
+    dent.messaging.add_handler('keyboard', self.key)
 
     if self.object.action_controller is not None:
       self.object.action_controller.action_weight = lambda x:\
         np.linalg.norm(x.get_end_position())
 
     self.time = 0.
+
+  def key(self, key):
+    if key == 'l':
+      if self.camera.lockObject:
+        self.camera.lockObject = None
+      else:
+        self.camera.lockObject = self.object
 
   def timer(self, fps):
     # Simply move the sun around the sky
