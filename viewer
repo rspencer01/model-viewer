@@ -5,5 +5,6 @@ dent.args.parser.add_argument('model')
 dent.args.parser.add_argument('--animation', required=False, default=None)
 dent.args.parser.add_argument('--actions', required=False, default=None)
 dent.args.parser.add_argument('--scale', required=False, default=1., type=float)
+dent.args.parser.add_argument('--no-floor', action='store_true')
 
 import dent.core

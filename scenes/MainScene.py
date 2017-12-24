@@ -29,7 +29,7 @@ class MainScene(Scene):
     self.camera.move_hook = lambda x: \
       [x[0], max(0.05, x[1]), x[2]]
 
-    self.floor = RectangleObject('floor')
+    self.floor = RectangleObject('floor') if not dent.args.args.no_floor else None
     self.sky = BlankImageObject(0.4, 0.5, 0.6)
 
     dent.messaging.add_handler('timer', self.timer)
@@ -59,7 +59,6 @@ class MainScene(Scene):
   def display(self, width, height, **kwargs):
     projection = dent.transforms.perspective(60.0, width/float(height), 0.03, 1e4)
     dent.Shaders.setUniform('projection', projection)
-    self.floor.shader['objectPos'] = self.object.position
 
     self.object.update(self.time)
 
@@ -67,4 +66,6 @@ class MainScene(Scene):
 
     self.sky.display()
     self.object.display()
-    self.floor.display()
+    if self.floor:
+      self.floor.shader['objectPos'] = self.object.position
+      self.floor.display()
