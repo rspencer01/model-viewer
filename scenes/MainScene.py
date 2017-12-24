@@ -1,4 +1,4 @@
-from dent.Scene import Scene
+from dent.Scene import DeferredRenderScene
 from dent.Object import Object
 from dent.RenderStage import RenderStage
 from dent.RectangleObjects import RectangleObject, BlankImageObject
@@ -9,11 +9,9 @@ import dent.transforms
 import dent.messaging
 import dent.args
 
-class MainScene(Scene):
+class MainScene(DeferredRenderScene):
   def __init__(self):
     super(MainScene, self).__init__()
-    self.renderPipeline.stages.append(
-        RenderStage(render_func=self.display, final_stage=True))
     self.object = Object(dent.args.args.model,
         will_animate=
           dent.args.args.animation is not None or
@@ -28,9 +26,10 @@ class MainScene(Scene):
     self.camera.lockDistance = 2
     self.camera.move_hook = lambda x: \
       [x[0], max(0.05, x[1]), x[2]]
+    self.cameraSpeed = 1
 
     self.floor = RectangleObject('floor') if not dent.args.args.no_floor else None
-    self.sky = BlankImageObject(0.4, 0.5, 0.6)
+    self.backgroundColor = np.array([.4,.5,.6])
 
     dent.messaging.add_handler('timer', self.timer)
     dent.messaging.add_handler('keyboard', self.key)
@@ -64,7 +63,6 @@ class MainScene(Scene):
 
     self.camera.render()
 
-    self.sky.display()
     self.object.display()
     if self.floor:
       self.floor.shader['objectPos'] = self.object.position

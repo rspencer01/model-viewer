@@ -8,7 +8,7 @@ uniform mat4 projection;
 
 void main()
 {
-  vec4 new_position = vec4(position.x*1000, 0, position.y*1000, 1);
+  vec4 new_position = vec4(position.x*10, 0, position.y*10, 1);
   gl_Position = projection * View * new_position;
-  pos = new_position.xz/2+0.5;
+  pos = new_position.xz;
 }

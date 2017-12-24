@@ -1,0 +1,61 @@
+#version 410
+in vec2 pos;
+out vec4 fragColor;
+
+uniform sampler2D colormap;
+uniform sampler2D normalmap;
+uniform sampler2D positionmap;
+
+uniform vec3 sunDirection;
+uniform vec3 CameraPosition;
+uniform vec3 backgroundColor;
+uniform float sunIntensity;
+
+uniform int numLights;
+uniform vec3 lightPositions[100];
+uniform vec3 lightColours[100];
+
+#include shaders/includes/shadows.shd;
+
+vec3 get_lighting(vec3 position, vec3 norm)
+{
+  float ambient_strength = 0.1;
+
+  float shadow_amount = get_total_shadow_amount(vec4(position,1));
+
+  vec3 diffuse = vec3(max(0.3,dot(norm, sunDirection)) * sunIntensity);
+
+  for (int i = 0; i< numLights; ++i)
+  {
+    vec3 intensity = lightColours[i] / (1+pow(length(position - lightPositions[i]),2));
+    diffuse += intensity * clamp(dot(norm,normalize(lightPositions[i] - position)),0,1);
+  }
+
+  vec3 halfway = normalize(
+      normalize(sunDirection) + normalize(CameraPosition.xyz - position));
+  float specular = pow(max(0,dot(halfway, norm)), 100);
+
+//  if (pos.x>0.5)
+  {
+    vec3 refl = normalize(reflect(normalize(position - CameraPosition.xyz), norm));
+    specular = pow(
+        max(0,dot(normalize(sunDirection), refl)),
+        25);
+  }
+
+  return max(vec3(0),ambient_strength + (diffuse+specular)*(1-shadow_amount));
+}
+
+void main()
+{
+  fragColor.a = 1;
+
+  vec3 normal = texture(normalmap,pos).xyz;
+  vec3 position = texture(positionmap,pos).xyz;
+  if (length(normal)<0.001)
+  {
+    fragColor.rgb = backgroundColor;
+    return;
+  }
+  fragColor.rgb = texture(colormap,pos).xyz*get_lighting(position, normal);
+}
