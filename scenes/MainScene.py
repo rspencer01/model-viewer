@@ -18,6 +18,7 @@ class MainScene(Scene):
         will_animate=
           dent.args.args.animation is not None or
           dent.args.args.actions is not None,
+        scale=dent.args.args.scale,
         daemon=False)
     if dent.args.args.animation:
       self.object.add_animation(dent.args.args.animation)
