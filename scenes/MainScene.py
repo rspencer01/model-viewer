@@ -4,6 +4,7 @@ from dent.RenderStage import RenderStage
 from dent.RectangleObjects import RectangleObject, BlankImageObject
 from dent.ActionController import ActionController
 import dent.Shaders
+from dent.Shadows import Shadows
 import numpy as np
 import dent.transforms
 import dent.messaging
@@ -40,6 +41,11 @@ class MainScene(DeferredRenderScene):
 
     self.time = 0.
 
+    self.shadows = Shadows(self.render_all, self.camera, rng=5)
+    self.shadows.shadowCamera.rotUpDown(1.2)
+    self.shadows.shadowCamera.rotLeftRight(3.1415-0.3)
+    self.shadowsEnabled = True
+
   def key(self, key):
     if key == 'l':
       if self.camera.lockObject:
@@ -55,6 +61,16 @@ class MainScene(DeferredRenderScene):
         np.cos(self.time)]))
     self.time += 1./fps
 
+    dent.Shaders.setUniform('sunDirection', -self.shadows.shadowCamera.direction)
+
+    self.shadows.shadowCamera.rotLeftRight(1./fps * 0.2)
+
+  def render(self, *args):
+    if self.shadowsEnabled:
+      self.shadows.render()
+    super(MainScene, self).render(*args)
+
+
   def display(self, width, height, **kwargs):
     projection = dent.transforms.perspective(60.0, width/float(height), 0.03, 1e4)
     dent.Shaders.setUniform('projection', projection)
@@ -62,6 +78,9 @@ class MainScene(DeferredRenderScene):
     self.object.update(self.time)
 
     self.camera.render()
+    self.render_all()
+
+  def render_all(self):
 
     self.object.display()
     if self.floor:
