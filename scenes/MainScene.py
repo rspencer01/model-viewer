@@ -30,7 +30,7 @@ class MainScene(DeferredRenderScene):
     self.cameraSpeed = 1
 
     self.floor = RectangleObject('floor') if not dent.args.args.no_floor else None
-    self.backgroundColor = np.array([.4,.5,.6])
+    self.lighting_stage.backgroundColor = np.array([.4,.5,.6])
 
     dent.messaging.add_handler('timer', self.timer)
     dent.messaging.add_handler('keyboard', self.key)
