@@ -36,6 +36,8 @@ void main()
   else
     actualNormal = normal;
 
+  if (texture(colormap, VertexOut.uv).a < 0.99) discard;
+
   fragmentColor  = vec4(texture(colormap, VertexOut.uv).rgb, 1);
   fragmentNorm  = vec4(normalize(actualNormal), 1);
   fragmentPos = VertexOut.position;
