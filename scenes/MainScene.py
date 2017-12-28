@@ -9,10 +9,16 @@ import numpy as np
 import dent.transforms
 import dent.messaging
 import dent.args
+from ViewerGui import ViewerGui
 
 class MainScene(DeferredRenderScene):
   def __init__(self):
     super(MainScene, self).__init__()
+    self.renderPipeline.stages.append(ViewerGui(
+      self.renderPipeline.stages[-1],
+      self,
+      final_stage=True))
+
     self.object = Object(dent.args.args.model,
         will_animate=
           dent.args.args.animation is not None or
