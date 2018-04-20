@@ -1,4 +1,4 @@
-from MainScene import MainScene
+from PhongScene import PhongScene
 
-__scenes__ = set([MainScene])
-__starting_scene__ = MainScene
+__scenes__ = set([PhongScene])
+__starting_scene__ = PhongScene

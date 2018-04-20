@@ -11,9 +11,9 @@ import dent.messaging
 import dent.args
 from ViewerGui import ViewerGui
 
-class MainScene(DeferredRenderScene):
+class PhongScene(DeferredRenderScene):
   def __init__(self):
-    super(MainScene, self).__init__()
+    super(PhongScene, self).__init__()
     self.renderPipeline.stages.append(ViewerGui(
       self.renderPipeline.stages[-1],
       self,
@@ -76,7 +76,7 @@ class MainScene(DeferredRenderScene):
   def render(self, *args):
     if self.shadowsEnabled:
       self.shadows.render()
-    super(MainScene, self).render(*args)
+    super(PhongScene, self).render(*args)
 
 
   def display(self, width, height, **kwargs):
@@ -87,7 +87,7 @@ class MainScene(DeferredRenderScene):
 
     self.camera.render()
     self.render_all()
-    super(MainScene, self).display(width=width, height=height, **kwargs)
+    super(PhongScene, self).display(width=width, height=height, **kwargs)
 
   def render_all(self):
 
