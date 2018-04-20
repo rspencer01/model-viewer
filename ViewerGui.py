@@ -8,7 +8,7 @@ class ViewerGui(GuiStage):
     self.scene = scene
 
 
-  def make_gui(self):
+  def make_gui(self, width, height):
     imgui.begin("Lighting", True)
 
     imgui.collapsing_header("Shadows")

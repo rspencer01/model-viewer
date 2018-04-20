@@ -23,12 +23,12 @@ out VertexData
 
 uniform mat4 View;
 uniform mat4 projection;
-uniform int options;
+uniform int hasSkinning;
 uniform mat4 bones[60];
 
 void main()
 {
-  if ((options/2) % 2 == 1)
+  if (hasSkinning != 0)
   {
     mat4 skeleton = bones[bone_ids.x] * weights.x + 
                     bones[bone_ids.y] * weights.y + 

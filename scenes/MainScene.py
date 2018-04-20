@@ -33,7 +33,7 @@ class MainScene(DeferredRenderScene):
     self.camera.lockDistance = 2
     self.camera.move_hook = lambda x: \
       [x[0], max(0.05, x[1]), x[2]]
-    self.cameraSpeed = 1
+    self.camera.speed = 1
 
     self.floor = RectangleObject('floor') if not dent.args.args.no_floor else None
     self.lighting_stage.backgroundColor = np.array([.4,.5,.6])
@@ -51,6 +51,8 @@ class MainScene(DeferredRenderScene):
     self.shadows.shadowCamera.rotUpDown(1.2)
     self.shadows.shadowCamera.rotLeftRight(3.1415-0.3)
     self.shadowsEnabled = True
+
+    self._objects=[]
 
   def key(self, key):
     if key == 'l':
@@ -85,6 +87,7 @@ class MainScene(DeferredRenderScene):
 
     self.camera.render()
     self.render_all()
+    super(MainScene, self).display(width=width, height=height, **kwargs)
 
   def render_all(self):
 

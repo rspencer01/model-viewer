@@ -31,10 +31,7 @@ void main()
 
   vec3 actualNormal;
 
-  if ((options) % 2 == 1)
-    actualNormal = mt * normalDetail;
-  else
-    actualNormal = normal;
+  actualNormal = mt * normalDetail;
 
   if (texture(colormap, VertexOut.uv).a < 0.99) discard;
 
