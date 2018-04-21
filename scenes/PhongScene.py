@@ -1,15 +1,17 @@
-from dent.Scene import DeferredRenderScene
-from dent.Object import Object
-from dent.RenderStage import RenderStage
-from dent.RectangleObjects import RectangleObject, BlankImageObject
-from dent.ActionController import ActionController
-import dent.Shaders
-from dent.Shadows import Shadows
 import numpy as np
+
+from dent.ActionController import ActionController
+from dent.Object import Object
+from dent.RectangleObjects import RectangleObject
+from dent.Scene import DeferredRenderScene
+from dent.Shadows import Shadows
+
+import dent.Shaders
 import dent.transforms
 import dent.messaging
 import dent.args
-from ViewerGui import ViewerGui
+
+from PhongViewerGui import PhongViewerGui
 
 
 class PhongScene(DeferredRenderScene):
@@ -17,7 +19,7 @@ class PhongScene(DeferredRenderScene):
     def __init__(self):
         super(PhongScene, self).__init__()
         self.renderPipeline.stages.append(
-            ViewerGui(self.renderPipeline.stages[-1], self, final_stage=True)
+            PhongViewerGui(self.renderPipeline.stages[-1], self, final_stage=True)
         )
 
         self.object = Object(

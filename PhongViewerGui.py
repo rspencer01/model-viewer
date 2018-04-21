@@ -2,10 +2,10 @@ from dent.GuiStage import GuiStage
 import imgui
 
 
-class ViewerGui(GuiStage):
+class PhongViewerGui(GuiStage):
 
     def __init__(self, lightingStage, scene, *args, **kwargs):
-        super(ViewerGui, self).__init__(*args, **kwargs)
+        super(PhongViewerGui, self).__init__(*args, **kwargs)
         self.lightingStage = lightingStage
         self.scene = scene
 
