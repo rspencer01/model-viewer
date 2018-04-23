@@ -1,0 +1,96 @@
+#version 410
+layout(location=0) out vec4 fragmentColor;
+
+in VertexData
+{
+  vec4 position;
+  vec4 normal;
+  vec4 color;
+  vec2 uv;
+  vec3 tangent;
+  vec3 bitangent;
+  vec4 boneids;
+} VertexOut;
+
+uniform sampler2D colormap;
+uniform sampler2D normalmap;
+uniform sampler2D specularmap;
+
+uniform int options;
+uniform vec3 sunDirection = normalize(vec3(0,1,1));
+uniform vec3 sunIntensity = vec3(1.1,1.1,0.9)*2;
+uniform vec3 CameraPosition;
+uniform float roughness;
+uniform float metallic = 1;
+uniform vec3 albedo = vec3(1,0.2,0);
+
+float PI=3.1415;
+
+float normal_dist(float roughness, vec3 normal, vec3 halfway)
+{
+  float roughness2 = roughness * roughness;
+  float numerator = roughness2 * roughness2;
+  float alignment = max(0, dot(normal,halfway));
+  float alignment2 = alignment*alignment;
+  float s = alignment2 * (numerator - 1) + 1;
+  float denominator = PI * s * s;
+  return numerator/denominator;
+}
+
+float geometry(float roughness, vec3 normal, vec3 incoming, vec3 outgoing)
+{
+  float d1 = max(0.0, dot(-incoming, normal));
+  float d2 = max(0.0, dot(outgoing, normal));
+  float k = (roughness + 1) * (roughness + 1)/8;
+  return d1*d2 / ((d2*(1-k)+k)*(d1*(1-k)+k));
+}
+
+vec3 fresnel(float roughness, vec3 normal, vec3 halfway, vec3 albedo)
+{
+  vec3 F = mix(vec3(0.04), albedo, metallic);
+  return F + (1-F) * pow(1-max(0,dot(halfway, normal)),5);
+}
+
+vec3 brdf(vec3 incoming, vec3 outgoing, vec3 normal, vec3 albedo)
+{
+  vec3 halfway = normalize(-incoming + outgoing);
+  float N = normal_dist(roughness, normal, halfway);
+  float D = geometry(roughness, normal, incoming, outgoing);
+  vec3 F = fresnel(roughness, normal, halfway, albedo);
+
+  vec3 diffuse = (1.0 - F) * (1-metallic);
+
+  float ck_denominator = 4 * max(0.0, dot(-incoming, normal)) *
+                             max(0.0, dot(outgoing,normal));
+  vec3 cook_torrence = F * N*D / max(0.001, ck_denominator);
+
+  return diffuse * albedo / PI + cook_torrence;
+}
+
+vec3 pbr(vec3 position, vec3 normal, vec2 uv)
+{
+  vec3 albedo = pow(texture(colormap, uv).rgb, vec3(2.2));
+  vec3 light_radiance = sunIntensity * clamp(dot(normal, sunDirection),0,1);
+  vec3 emis = brdf(normalize(position - CameraPosition.xyz), sunDirection, normal, albedo)  * light_radiance;
+  vec3 ambient = albedo * 0.03;
+  return emis + ambient;
+}
+
+void main()
+{
+  vec3 normalDetail = vec3(texture(normalmap, VertexOut.uv).rg-0.5, 0);
+  normalDetail.z = 1 - length(normalDetail);
+  vec3 normal       = normalize(VertexOut.normal.xyz);
+  vec3 tangent      = normalize(VertexOut.tangent.xyz);
+  vec3 bitangent    = normalize(VertexOut.bitangent.xyz);
+  mat3 mt           = mat3(tangent, bitangent, normal);
+
+  vec3 actualNormal = normalize(mt*normalDetail);
+
+  vec3 specular = texture(specularmap, VertexOut.uv).rgb;
+
+  fragmentColor = vec4(pbr(VertexOut.position.xyz, actualNormal, VertexOut.uv), 1);
+
+  fragmentColor.rgb = fragmentColor.rgb / (fragmentColor.rgb + vec3(1));
+  fragmentColor.rgb = pow(fragmentColor.rgb,  vec3(1/2.2));
+}

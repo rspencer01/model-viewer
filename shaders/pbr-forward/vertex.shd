@@ -1,0 +1,56 @@
+#version 410
+layout(location=1) in vec3 position;
+layout(location=2) in vec3 normal;
+layout(location=3) in vec4 color;
+layout(location=4) in vec2 textcoord;
+layout(location=5) in vec3 tangent;
+layout(location=6) in vec3 bitangent;
+layout(location=7) in ivec4 bone_ids;
+layout(location=8) in vec4 weights;
+
+uniform mat4 model;
+
+out VertexData
+{
+  vec4 position;
+  vec4 normal;
+  vec4 color;
+  vec2 uv;
+  vec3 tangent;
+  vec3 bitangent;
+  vec4 boneids;
+} VertexOut;
+
+uniform mat4 View;
+uniform mat4 projection;
+uniform int hasSkinning;
+uniform mat4 bones[60];
+
+void main()
+{
+  if (hasSkinning != 0)
+  {
+    mat4 skeleton = bones[bone_ids.x] * weights.x + 
+                    bones[bone_ids.y] * weights.y + 
+                    bones[bone_ids.z] * weights.z + 
+                    bones[bone_ids.a] * weights.a;
+    VertexOut.position = model * skeleton * vec4(position,1.0);
+    VertexOut.normal = transpose(inverse(model* skeleton)) * vec4(normal, 0);
+    VertexOut.tangent = (transpose(inverse(model* skeleton)) * vec4(tangent, 0)).xyz;
+    VertexOut.bitangent = (transpose(inverse(model* skeleton)) * vec4(bitangent, 0)).xyz;
+    VertexOut.boneids = bone_ids;
+  }
+  else
+  {
+    VertexOut.position = model*vec4(position,1.0);
+    VertexOut.normal = transpose(inverse(model)) * vec4(normal, 0);
+    VertexOut.tangent = (transpose(inverse(model)) * vec4(tangent, 0)).xyz;
+    VertexOut.tangent = vec4(tangent, 0).xyz;
+    VertexOut.bitangent = (transpose(inverse(model)) * vec4(bitangent, 0)).xyz;
+  }
+  VertexOut.tangent = tangent.xyz;
+  VertexOut.color = color;
+  VertexOut.uv = textcoord;
+
+  gl_Position = projection * View * VertexOut.position;
+}
