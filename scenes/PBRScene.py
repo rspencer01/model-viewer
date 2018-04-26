@@ -33,16 +33,12 @@ class PBRScene(Scene):
             self.object.action_controller = ActionController(
                 self.object, dent.args.args.actions
             )
-        self.camera = Camera()
         self.camera.lockObject = self.object
         self.camera.lockDistance = 2
 
         dent.messaging.add_handler("timer", self.timer)
 
         self.time = 0.
-        self.roughness = 0.
-        self.metallic = 0.
-        self.material_color = np.array([1.,1.,1.])
         self.sun_color = np.array([1.,1.,1.])
         self.sun_intensity = 10
 
@@ -60,9 +56,6 @@ class PBRScene(Scene):
     def display(self, width, height, **kwargs):
         projection = dent.transforms.perspective(60.0, width / float(height), 0.03, 1e4)
         dent.Shaders.setUniform("projection", projection)
-        dent.Shaders.setUniform("roughness", self.roughness)
-        dent.Shaders.setUniform("metallic", self.metallic)
-        dent.Shaders.setUniform("albedo", self.material_color)
         dent.Shaders.setUniform("sunIntensity", self.sun_color * self.sun_intensity)
 
         self.object.update(self.time)
