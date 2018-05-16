@@ -1,0 +1,42 @@
+#version 400
+in vec2 pos;
+out vec4 fragColor;
+
+uniform sampler2D input_texture;
+
+const vec2 invAtan = vec2(0.1591, 0.3183);
+const float PI = 3.141592;
+
+vec3 sample_skymap(sampler2D skymap, vec3 direction)
+{
+  vec2 uv = vec2(atan(direction.z, direction.x), -asin(direction.y));
+  uv = uv * invAtan + 0.5;
+  return textureLod(skymap, uv, 0).rgb*256;
+}
+
+void main()
+{
+  vec2 inuv = (pos - 0.5) / invAtan;
+  vec3 direction = vec3(cos(inuv.x) * cos(inuv.y), sin(inuv.y), sin(inuv.x) * cos(inuv.y));
+
+  vec3 result = vec3(0);
+  int num_samples = 0;
+  float sample_delta = 0.08;
+  for (float phi = 0.0; phi < 2*PI; phi += sample_delta)
+  {
+    for (float theta = -PI/2; theta < PI/2; theta += sample_delta)
+    {
+      float d = cos(theta);
+      vec3 sample_direction = vec3(cos(phi)*cos(theta),
+                                   sin(theta),
+                                   sin(phi)*cos(theta));
+      result += sample_skymap(input_texture, sample_direction)
+                * max(0, dot(sample_direction, direction))
+                * d;
+      num_samples++;
+    }
+  }
+
+  fragColor.rgb = result/num_samples * PI;
+  fragColor.a = 1;
+}

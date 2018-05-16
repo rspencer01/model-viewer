@@ -11,6 +11,7 @@ import dent.messaging
 import dent.transforms
 
 from PBRViewerGui import PBRViewerGui
+from PBREnvironment import PBREnvironment
 
 
 class PBRScene(Scene):
@@ -39,22 +40,26 @@ class PBRScene(Scene):
         dent.messaging.add_handler("timer", self.timer)
 
         self.time = 0.
-        self.sun_color = np.array([1.,1.,1.])
+        self.sun_color = np.array([1., 1., 1.])
         self.sun_intensity = 10
 
-        self._objects = [self.object]
+        self._objects = [
+            self.object,
+            PBREnvironment("../pbrtest/assets/skymaps/dusk/hdri_sky_01_small.hdr")
+        ]
         self.time_enabled = True
 
     def timer(self, fps):
         # Simply move the sun around the sky
         dent.Shaders.setUniform(
-            "sunDirection", np.array([np.sin(self.time), 0.4, np.cos(self.time)])
+            "sunDirection", np.array([np.sin(self.time), 0.4, np.cos(self.time)])/(1+0.4)**0.5
         )
         if self.time_enabled:
-          self.time += 1. / fps
+            self.time += 1. / fps
 
     def display(self, width, height, **kwargs):
         projection = dent.transforms.perspective(60.0, width / float(height), 0.03, 1e4)
+        dent.Shaders.setUniform("aspectRatio", width/float(height))
         dent.Shaders.setUniform("projection", projection)
         dent.Shaders.setUniform("sunIntensity", self.sun_color * self.sun_intensity)
 

@@ -1,0 +1,36 @@
+#version 400
+in vec2 pos;
+out vec4 fragColor;
+
+uniform sampler2D colormap;
+uniform sampler2D irradience_map;
+uniform mat4 View;
+uniform float aspectRatio;
+
+const vec2 invAtan = vec2(0.1591, 0.3183);
+
+vec3 sample_skymap(sampler2D skymap, vec3 direction)
+{
+  vec2 uv = vec2(atan(direction.z, direction.x), asin(direction.y));
+  uv = uv * invAtan + 0.5;
+  return textureLod(skymap, uv, 0).rgb;
+}
+
+void main()
+{
+  vec3 right   = -vec3(View[0][0],View[1][0],View[2][0]);
+  vec3 up      = -vec3(View[0][1],View[1][1],View[2][1]);
+  vec3 forward = vec3(View[0][2],View[1][2],View[2][2]);
+
+  // 0.57735 is tan(60), the field of view
+  vec3 direction       = normalize(
+      forward +
+      right * (pos.x-0.5)*2 * 0.57735 * aspectRatio +
+      up    * (pos.y-0.5)*2 * 0.57735);
+
+  vec3 col = sample_skymap(colormap, direction) * 256;
+  col = col / (col + vec3(1));
+  col = pow(col, vec3(1.0/2.2));
+  fragColor = vec4(col,1);
+  fragColor.a = 1;
+}
